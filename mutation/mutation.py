@@ -39,6 +39,7 @@ class MutationTesting:
     
       
     def replace_constant(self ,assertion, unsat_index):
+        
         self.asserts = assertion.copy()
         self.asserts[unsat_index] = Bool(self.replace_integer_with_variable(str(self.asserts[unsat_index]), "x"))
         print(self.asserts)
@@ -50,7 +51,8 @@ class MutationTesting:
     
     def replace_integer_with_variable(self, equation, variable):
         # Find the integer in the equation using a regular expression
-        match = re.search(r'\d+', equation)
+        number_pattern = r'(?<!\w)(-?\d*\.?\d+(?:[eE][-+]?\d+)?)(?!\w)'
+        match = re.search(number_pattern, equation)
         if match is not None:
             # If an integer is found, replace it with the variable
             integer = match.group()

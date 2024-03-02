@@ -1,0 +1,10 @@
+Task to do:
+1. our variable(x) might be different datatype like
+    1. Int
+    2. Float
+    3. bool
+    4. another variable with char+num like "var22"
+
+2. Get input as SMT Solver 
+
+3. output must be in SMT-lib format (using to_smt2() )
