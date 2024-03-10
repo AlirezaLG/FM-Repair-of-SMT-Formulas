@@ -1,6 +1,7 @@
 from z3 import *
 from func import *
 import re
+import time
 
 class MutationTesting:
     def __init__(self):
@@ -32,17 +33,17 @@ class MutationTesting:
         
         if mutation_type == "replace_constant":
             # replace constant
-            print_d("\nreplace constant method\n")
+            print_d("\nReplace constant method\n")
             self.replace_constant(assertion, assertion_index)
            
         elif mutation_type == "replace_operator":
             # replace operator
-            print_d("\nreplace operator method\n")
+            print_d("\nReplace operator method\n")
             self.replace_operator(assertion, assertion_index)
             
         elif mutation_type == "delete_assertion":
             # delete subformula
-            print_d("\ndelete assertion method\n")
+            print_d("\nDelete assertion method\n")
             self.delete_assertion(assertion, assertion_index)
 
         else:
@@ -52,19 +53,21 @@ class MutationTesting:
     
     
     def delete_assertion(self, assertion, unsat_index):
+        start_time = time.time()
         self.asserts = assertion.copy()
         print_d("Deleted Assertion index is: ",str(self.asserts[unsat_index]))
         self.asserts.pop(unsat_index)
-        self.check_sat(self.asserts)
+        self.check_sat(self.asserts, start_time)
     
     
     # replace only one operator at the time 
     def replace_operator(self, assertion, unsat_index):
+        
         self.asserts = assertion.copy()
         print_d("Default unsat assertion is: ",self.asserts[unsat_index],"\n") # print the unsat assertion only 
         words = str(self.asserts[unsat_index]).split()
         
-
+        start_time = time.time()
         # Find Arithmetic operator
         for i, word in enumerate(words):
             if word in arithmetic_operators:
@@ -75,9 +78,10 @@ class MutationTesting:
                         words[i] =  word.replace(word, op)
                         print_d("New Assertions is: "," ".join(words));
                         self.asserts[unsat_index] = Bool(" ".join(words))
-                        self.check_sat(self.asserts)
+                        self.check_sat(self.asserts, start_time)
                         words[i] = orginal_operand
         
+        start_time = time.time()
         self.asserts = assertion.copy() # make a new copy, old copy is modified
         # Find Comparison operator
         for i, word in enumerate(words):
@@ -89,7 +93,7 @@ class MutationTesting:
                         words[i] =  word.replace(word, op)
                         print_d("New Assertions is: "," ".join(words));
                         self.asserts[unsat_index] = Bool(" ".join(words))
-                        self.check_sat(self.asserts)
+                        self.check_sat(self.asserts, start_time)
                         words[i] = orginal_operand
         
 
@@ -98,12 +102,10 @@ class MutationTesting:
    
     # replace constant
     def replace_constant(self ,assertion, unsat_index):
+        start_time = time.time()
         self.asserts = assertion.copy()
         self.asserts[unsat_index] = Bool(self.replace_integer_with_variable(str(self.asserts[unsat_index]), "x"))
-        # print_d(self.asserts)
-        # solver = Solver()
-        # solver.add(self.asserts)
-        self.check_sat(self.asserts)
+        self.check_sat(self.asserts, start_time)
         
         
         
@@ -125,14 +127,16 @@ class MutationTesting:
     
     
     # check the satisfiability
-    def check_sat(self, asserts):
+    def check_sat(self, asserts, start_time = 0):
         solver = Solver()
         solver.add(asserts)
         if solver.check() == sat:
             m = solver.model()
             self.mutation_number += 1
             print_d("Sat and model is: \n"+ str(m)+ "\n")
-            print_p("Sat and New SMT-LIB formula is: \n"+ solver.to_smt2() + "\n")
+            print_p("Sat and New SMT-LIB formula is: \n"+ solver.to_smt2())
+            print_d("Execution time in ms: ", (time.time() - start_time) * 1000 )
+            print_d("----------------------------------------------\n")
             return True
         else:
             print_d("unsat and failed to find a Model\n")
