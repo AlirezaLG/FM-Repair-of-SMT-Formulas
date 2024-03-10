@@ -2,7 +2,6 @@
 (declare-const rainbow Int)
 (declare-const rain Int)
 (declare-const lightning Int)
-
 (declare-const solution Int)
 
 (assert (= 12 (+ (- doubleRainbow rainbow) rainbow)))

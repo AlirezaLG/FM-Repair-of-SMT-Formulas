@@ -1,72 +1,35 @@
-from z3 import * 
-# from unsatcore.unsat import * 
-# from mutation.mutation import * 
+from z3 import *
+from func import *
 
+# Read the SMT-LIB formula from a text file
+file_path = './formula/formula2.txt';
+with open(file_path, 'r') as file:
+    formula_string = file.read()
+
+# Call the function to extract constants with data types and assertions
+constants, assertions = extract_constants_and_assertions_with_datatypes(formula_string)
+
+# Create a solver
 solver = Solver()
 
-# doubleRainbow = Int('doubleRainbow')
-# rainbow = Int("rainbow")
-# rain = Int("rain")
-# lightning = Int("lightning")
-# solution = Int("solution")
-# x = Int("x")
+# Declare constants alonside their data types
+context = {}
+for constant, datatype in constants.items():
+    context[constant] = eval(datatype)(constant) # {'x': x, 'y': y}
 
-# assertion = [ 
-#             (12 == (doubleRainbow - rainbow + rainbow)),
-#             (4 == (doubleRainbow - rain - rain)),
-#             (22 == ((rain * rainbow) - lightning)),
-#             (x == doubleRainbow),
-#             (solution == (doubleRainbow / lightning - rain))
-#         ]
-# assertion =[
-#     doubleRainbow - rainbow + rainbow == x,
-#     doubleRainbow - rain - rain == 4, 
-#     rain*rainbow - lightning == 22, 
-#     doubleRainbow == 13,
-#     solution == doubleRainbow/lightning - rain]
-
-# assertion =[
-#     doubleRainbow - rainbow + rainbow == 12,
-#     doubleRainbow - rain - rain == 4, 
-#     rain*rainbow - lightning == 22, 
-#     doubleRainbow == x,
-#     solution == doubleRainbow/lightning - rain]
-
-
-# solver.add(assertion)
-
-# assertion = [ 
-#                 '(= 12 (+ (- doubleRainbow rainbow) rainbow))',
-#                 '(= 4 (- (- doubleRainbow rain) rain))',
-#                 '(= 22 (- (* rain rainbow) lightning))',
-#                 '(= 13 doubleRainbow)',
-#                 '(= solution (- (/ doubleRainbow lightning) rain))'
-#             ]
-assertions = []
-filename = "bank/formula2.txt"
-
-with open(filename, "r") as file:
-    for line in file:
-        # Check if the line contains an assertion
-        if line.startswith('(assert'):
-            # Extract the assertion
-            assertion = line.strip()
-            assertions.append(assertion)
-    smtlib_formula = file.read()
-
+# Convert SMT-lib to FOL 
+new_assertions = []
 for assertion in assertions:
-    print("Assertion:", assertion)
+    new_assertions.append(parse_smt2_string(assertion, decls=context))
 
-            
-solver.from_string(smtlib_formula)
+solver.add(new_assertions)
 
-
-# check model and unsat core
+# Check for satisfiability
 if solver.check() == sat:
-    
-    #read the model
+    print("The formula is sat")
     model = solver.model()
-    print("\nSat and model is \n"+ str(model) + "\n")
+    print("Model:")
+    print(model)
 else:
-    print("unsat");
-# 
+    
+    print("The formula is unsat.")

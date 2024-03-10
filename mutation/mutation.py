@@ -11,12 +11,13 @@ class MutationTesting:
     # mutant for each unsat [a1, a4]
     def mutant_each_unsat(self, assertion, unsat_core):
         for index in unsat_core:
-            print("\nassertion index is:"+str(index))
+            print("\nAssertion index is: "+str(index))
             # self.implement_mutant_type(assertion, assertion[index])
             # implement different mutation types
             for mutation_type in self.mutation_types:
                 result = self.mutate_test(assertion, index , mutation_type)
                 # return ("for index "+ str(index) + "-" +str(result))
+        
     
     
     def mutate_test(self, assertion, assertion_index , mutation_type):
@@ -31,15 +32,13 @@ class MutationTesting:
         elif mutation_type == "delete_subformula":
             # delete subformula
             print("delete subformula")
-            
+
         else:
             print("unkown mutation type")
-        
         return "unsat";
     
       
     def replace_constant(self ,assertion, unsat_index):
-        
         self.asserts = assertion.copy()
         self.asserts[unsat_index] = Bool(self.replace_integer_with_variable(str(self.asserts[unsat_index]), "x"))
         print(self.asserts)
@@ -47,7 +46,7 @@ class MutationTesting:
         solver.add(self.asserts)
         self.check_sat(solver)
         print("end")
-    
+        
     
     def replace_integer_with_variable(self, equation, variable):
         # Find the integer in the equation using a regular expression
@@ -66,7 +65,7 @@ class MutationTesting:
     def check_sat(self, solver):
         if solver.check() == sat:
             m = solver.model()
-            print("\nSat and model is \n"+ str(m))
+            print("\nSat and model is: \n"+ str(m))
         else:
             print("unsat and failed to find a model")
         

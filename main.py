@@ -1,63 +1,47 @@
-from z3 import * 
+from z3 import *
 from unsatcore.unsat import * 
 from mutation.mutation import * 
-from func import * 
+from func import *
 
+# Read the SMT-LIB formula from a text file
+file_path = './formula/formula33.txt';
+with open(file_path, 'r') as file:
+    formula_string = file.read()
+
+# Call the function to extract constants with data types and assertions
+constants, SMTLIB_assertions = extract_constants_and_assertions_with_datatypes(formula_string)
+
+# Create a solver
 solver = Solver()
 
+# Declare constants alonside their data types
+context = {}
+for constant, datatype in constants.items():
+    context[constant] = eval(datatype)(constant) # {'x': x, 'y': y}
 
-# variable declarations
-doubleRainbow3 = Real('doubleRainbow3')
-rainbow = Int("rainbow")
-rain = Int("rain")
-lightning = Int("lightning")
-solution = Real("solution")
+print(context);
 
-# assertions
-assertion = [ 
-            (12 == (doubleRainbow3 - rainbow + rainbow)),
-            (4 == (doubleRainbow3 - rain - rain)),
-            (22 == ((rain * rainbow) - lightning)),
-            (13 == doubleRainbow3),
-            (solution == (doubleRainbow3 / lightning - rain))
-        ]
-# print("\nassertion is: ", assertion)
-solver.add(assertion)
+# Convert SMT-LIB[QF-LIA] to FOL 
+assertions = []
+for SMTLIB_assertion in SMTLIB_assertions:
+    assertions.append(parse_smt2_string(SMTLIB_assertion, decls=context))
 
+solver.add(assertions)
 
-# check model and unsat core
+# Check for satisfiability
 if solver.check() == sat:
-    
-    #read the model
     model = solver.model()
-    print("\nSat and model is \n"+ str(model.eval) + "\n")
-
+    print("\nFormula is sat \nour model is:\n",model,'\n')
+    
 elif solver.check() == unsat:
-    
     # check the unsat core
-    u = UnsatCoreChecker()
-    unsat_result = u.check_unsat_core(solver)
+    unsat = UnsatCoreChecker()
+    unsat_result = unsat.check_unsat_core(solver)
+    print("\nFormula is unsat \nunsat core at:"+ str(unsat_result) + "\n")
     
-    print("\nunsat core at: "+ str(unsat_result) + "\n")
-    
-    # implement test mutation here
-    m = MutationTesting()
-    
-    mutation_result = m.mutant_each_unsat(assertion, unsat_result)
-    print("\n mutation result is: "+ str(mutation_result) + "\n")
-    
+    # check the mutation
+    mutation = MutationTesting()
+    mutation_result = mutation.mutant_each_unsat(assertions, unsat_result)
     
 else:
-    print("unkown")
-
-
-# doubleRainbow - rainbow + rainbow == 12
-# doubleRainbow - rain - rain == 4
-# rain * rainbow - lightning == 22
-# doubleRainbow / lightning - rain == solution
-
-# 12 + 2 -2 = 12
-# 12 - 4 - 4 = 4
-# (4 * -2) - (-30) = 22
-# (12 / -30) - 4 = -4
-
+    print("The formula is unknown.") 
