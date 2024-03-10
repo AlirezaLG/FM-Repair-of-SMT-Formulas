@@ -1,4 +1,5 @@
 from z3 import * 
+from config import *
 
 def convert_SMTlib_to_Z3Solver(smtlib_formula, index):
     # Split the formula into parts
@@ -45,3 +46,12 @@ def extract_constants_and_assertions_with_datatypes(formula_string):
             
 
     return constants, assertions
+# print works only on Development mode
+def print_d(*args, **kwargs):
+    if dev:
+        print(*args, **kwargs)
+
+# print work only on Production mode 
+def print_p(*args, **kwargs):
+    if dev == False:
+        print(*args, **kwargs)
