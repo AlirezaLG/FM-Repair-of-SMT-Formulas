@@ -1,4 +1,12 @@
 from z3 import *
+
+s = Solver()
+p = Bool('p')
+assertion = parse_smt2_string('and(p, or(p, not(p)))')
+
+s.add(assertion)
+print(s.check())
+print(s.model())
 # # from func import *
 
 # from z3 import *
@@ -33,15 +41,13 @@ from z3 import *
 #     print("The formula is unsatisfiable.")
 
 
-s = Solver()
+
 
 # Either this
 # x = Function('x', IntSort())
 # or this works from python
-x = Int('x')
-y = Int('x')
+# x = Int('x')
+# y = Int('x')
 
-assertion = parse_smt2_string('(assert (>= (* 2 x) 4))', decls={"x": x, "y": y})
-s.add(assertion)
-print(s.check())
-print(s.model())
+# assertion = parse_smt2_string('(assert (>= (* 2 x) 4))', decls={"x": x, "y": y})
+

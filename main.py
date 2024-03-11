@@ -6,7 +6,7 @@ import cProfile
 import pstats
 
 # Read the SMT-LIB formula from a text file
-file_path = './formula/formula11.txt';
+file_path = './formula/formula2.txt';
 with open(file_path, 'r') as file:
     formula_string = file.read()
 

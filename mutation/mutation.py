@@ -22,9 +22,13 @@ class MutationTesting:
             print_d("-------------------------------\n")
             # self.implement_mutant_type(assertion, assertion[index])
             # implement different mutation types
-            for mutation_type in self.mutation_types:
-                result = self.mutate_test(assertion, index , mutation_type)
-                # return ("for index "+ str(index) + "-" +str(result))
+            
+            if is_bool(Bool(str(assertion[index][0]))):
+                self.bool_assertion(assertion,  index)
+            else:
+                for mutation_type in self.mutation_types:
+                    result = self.mutate_test(assertion, index , mutation_type)
+                    # return ("for index "+ str(index) + "-" +str(result))
         # return result 
         
     
@@ -51,9 +55,18 @@ class MutationTesting:
 
         else:
             print_d("unkown mutation type")
-        
         # return result
     
+    def bool_assertion(self, assertion, unsal_bool):
+        start_time = time.time()
+        asserts = assertion.copy() # make a new copy, old copy is modified
+        print_d("Logical operators: ")
+        print_d("Default unsat bool index is: ",assertion[unsal_bool][0] ,"\n")
+        
+        # check for the first logical operator
+        asserts[unsal_bool] = replace_logical_operators(assertion[unsal_bool][0])
+        print_d("revised assertions is: ",asserts[unsal_bool])
+        self.check_sat(asserts, start_time, True)
     
     def delete_assertion(self, assertion, unsat_index):
         start_time = time.time()
@@ -101,23 +114,10 @@ class MutationTesting:
                         self.check_sat(asserts, start_time)
                         words[i] = orginal_operand
         
-        start_time = time.time()
-        asserts = assertion.copy() # make a new copy, old copy is modified
-        words = str(asserts[unsat_index]).split()
         # Find Logical operator
-        print_d("Logical operators: ")
-        for i, word in enumerate(words):
-            if word in logical_operators:
-                print_d("found operator", word)
-                for op in logical_operators:
-                    orginal_operand = word
-                    if (word != op): #we dont want to check assertion with same operator
-                        words[i] =  word.replace(word, op)
-                        print_d("New Assertions is: "," ".join(words));
-                        asserts[unsat_index] = Bool(" ".join(words))
-                        self.check_sat(asserts, start_time)
-                        words[i] = orginal_operand
         
+        
+
 
         # return string
         
@@ -150,21 +150,25 @@ class MutationTesting:
     
     
     # check the satisfiability
-    def check_sat(self, asserts, start_time = 0):
+    def check_sat(self, asserts, start_time = 0, op_bool = False):
         if(asserts != []):
             solver = Solver()
             solver.add(asserts)
             if solver.check() == sat:
                 m = solver.model()
                 self.mutation_number += 1
-                print_d("Sat and model is: \n"+ str(m)+ "\n")
-                print_p("Sat and New SMT-LIB formula is: \n"+ solver.sexpr())
-                print_d("Execution time in ms: ", (time.time() - start_time) * 1000 )
+                if(op_bool):
+                    print_d("Our solution is Sat \n")
+                else:
+                    print_d("Sat and model is: \n"+ str(m)+ "\n")
+                    print_p("Sat and New SMT-LIB formula is: \n"+ solver.to_smt2()) #sexpr
+                print_d("Execution time in ms: ", (time.time() - start_time) * 1000 ) 
                 print_d("-----------------------------------")
                 return True
             else:
                 print_d("unsat and failed to find a Model\n")
                 return False
         else:
-            print("No assertion to check\n")        
+            print("No assertion to check\n")
+            return False        
         

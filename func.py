@@ -1,6 +1,22 @@
 from z3 import * 
 from config import *
 
+def replace_logical_operators(expr):
+    # expr = Bool(str(expr))
+    if is_and(expr):
+        # Replace AND with your desired operation
+        return Or(expr.children())
+    elif is_or(expr):
+        # Replace OR with your desired operation
+        return And(expr.children())
+    elif is_not(expr):
+        # Replace NOT with your desired operation
+        return expr.arg(0)
+    else:
+        # If it's not a logical operator, return as it is
+        return expr
+
+
 def convert_SMTlib_to_Z3Solver(smtlib_formula, index):
     # Split the formula into parts
     parts = smtlib_formula.strip().split()
