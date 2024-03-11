@@ -16,6 +16,26 @@ def replace_logical_operators(expr):
         # If it's not a logical operator, return as it is
         return expr
 
+def contains_logical_operators(expr):
+    if is_and(expr) or is_or(expr) or is_not(expr):
+        return True
+    elif is_const(expr):
+        return False
+    else:
+        for child in expr.children():
+            if contains_logical_operators(child):
+                return True
+    return False
+
+def array_check_for_match(array1, array2):
+    set1 = set(array1)
+    set2 = set(array2)
+    
+    # Check if there's any intersection between the sets
+    if set1.intersection(set2):
+        return True  # Match found
+    else:
+        return False  # No match found
 
 def convert_SMTlib_to_Z3Solver(smtlib_formula, index):
     # Split the formula into parts

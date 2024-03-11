@@ -6,7 +6,7 @@ import cProfile
 import pstats
 
 # Read the SMT-LIB formula from a text file
-file_path = './formula/formula2.txt';
+file_path = './formula/formula20.txt';
 with open(file_path, 'r') as file:
     formula_string = file.read()
 
@@ -21,7 +21,7 @@ context = {}
 for constant, datatype in constants.items():
     context[constant] = eval(datatype)(constant) # {'x': x, 'y': y}
 
-# print(context);
+print("constants are: ", context);
 
 # Convert SMT-LIB[QF-LIA] to FOL 
 assertions = []
@@ -35,21 +35,23 @@ for SMTLIB_assertion in SMTLIB_assertions:
 
 
 solver.add(assertions)
+print_d("assertions are: ", assertions[2])
 
+exit()
 # check mode
 print("You are in: ", mode, "mode \n ")
 # with cProfile.Profile() as pr:
     # Check for satisfiability
 if solver.check() == sat:
     model = solver.model()
-    print("\nFormula is sat \nour model is:\n",model,'\n')
+    print("Formula is sat \nour model is:\n",model,'\n')
     print_p("Sat and New SMT-LIB formula is: \n"+ solver.sexpr() + "\n")
     
 elif solver.check() == unsat:
     # check the unsat core
     unsat = UnsatCoreChecker()
     unsat_result = unsat.check_unsat_core(solver)
-    print("\nFormula is unsat \nunsat core at:"+ str(unsat_result) + "\n")
+    print("Formula is unsat \nunsat core at:"+ str(unsat_result) + "\n")
     
     # check the mutation
     mutation = MutationTesting()

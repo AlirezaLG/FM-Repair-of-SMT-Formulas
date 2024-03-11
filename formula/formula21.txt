@@ -4,4 +4,5 @@
 (assert (< x3 0))
 (assert (= yx 0))
 (assert (>= z2 4.0))
-(assert (= (+ (+ x3 y) z2) 10))
+(assert (> x3 0))
+(assert (= (+ (+ x3 yx) z2) 10))
