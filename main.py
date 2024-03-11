@@ -6,7 +6,7 @@ import cProfile
 import pstats
 
 # Read the SMT-LIB formula from a text file
-file_path = './formula/formula30.txt';
+file_path = './formula/formula11.txt';
 with open(file_path, 'r') as file:
     formula_string = file.read()
 
@@ -43,7 +43,7 @@ print("You are in: ", mode, "mode \n ")
 if solver.check() == sat:
     model = solver.model()
     print("\nFormula is sat \nour model is:\n",model,'\n')
-    print_p("Sat and New SMT-LIB formula is: \n"+ solver.to_smt2() + "\n")
+    print_p("Sat and New SMT-LIB formula is: \n"+ solver.sexpr() + "\n")
     
 elif solver.check() == unsat:
     # check the unsat core
