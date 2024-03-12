@@ -1,18 +1,88 @@
 from z3 import *
 
-# Create variables
-x, y = Ints('x y')
+x = Int('x')
+y = Int('y')
+n = x + y >= 3
+print ("num args: ", n.num_args())
+print ("children: ", n.children())
+print ("1st child:", n.arg(0))
+print ("2nd child:", n.arg(1))
+print ("operator: ", n.decl())
+print ("op name:  ", n.decl().name())
 
-# Define the assertion
-assertion = (x - 2)+y > 10
+# def find_arithmetic_operators(expr):
+#     # Base case: if the expression is a constant or a simple variable, return
+#     if is_const(expr) or is_var(expr):
+#         return
+    
+#     # Check if the expression is an arithmetic operator
+#     if expr.decl().kind() in [Z3_OP_ADD, Z3_OP_SUB, Z3_OP_MUL, Z3_OP_DIV, Z3_OP_MOD, Z3_OP_REM]:
+#         # Print the operator
+#         print(expr.decl())
+    
+#     # Recursively check the arguments of the expression
+#     for arg in expr.children():
+#         find_arithmetic_operators(arg)
+
+# # Example usage
+# x, y, z = Ints('x y z')
+# original_expr = 12 < x - y + z + 1 + 4
+
+# Traverse the expression and find arithmetic operators
+# find_arithmetic_operators(original_expr)
+# from z3 import *
+
+# # Create a Z3 context
+# ctx = Context()
+
+# # Define functions for each operator
+# def eq(x, y):
+#     return x == y
+
+# def gt(x, y):
+#     return x > y
+
+# def lt(x, y):
+#     return x < y
+
+# def ge(x, y):
+#     return x >= y
+
+# def le(x, y):
+#     return x <= y
+
+# # Create FuncDeclRef objects for each operator
+# eq_func = Function('==', IntSort(ctx), IntSort(ctx), BoolSort(ctx))
+# gt_func = Function('>', IntSort(ctx), IntSort(ctx), BoolSort(ctx))
+# lt_func = Function('<', IntSort(ctx), IntSort(ctx), BoolSort(ctx))
+# ge_func = Function('>=', IntSort(ctx), IntSort(ctx), BoolSort(ctx))
+# le_func = Function('<=', IntSort(ctx), IntSort(ctx), BoolSort(ctx))
+
+# # Print the FuncDeclRef objects for each operator
+# print("FuncDeclRef for '==':", eq_func)
+# print("FuncDeclRef for '>':", gt_func)
+# print("FuncDeclRef for '<':", lt_func)
+# print("FuncDeclRef for '>=':", ge_func)
+# print("FuncDeclRef for '<=':", le_func)
+
+# Create variables
+# x, y,z = Ints('x y z')
+# comparison_operators = [ '==', '>', '<', '>=', '<=']
+# # Define the assertion
+# assertion = 12 < x - y + z
+# for op in comparison_operators:
+#     print(type(assertion))
+#     print(type(Bool(op)))
+#     new_assert = substitute(assertion, (Bool(str(assertion.decl())), '\<' ))
+#     print("New Assertion is:\t", new_assert)
 
 # Extract constant values
-constants = set()
+# constants = set()
 
-for term in assertion.children():
-    print("term is:",term)
-    if is_int_value(term):
-        print("int value is:",term)
+# for term in assertion.children():
+#     print("term is:",term)
+#     if is_int_value(term):
+#         print("int value is:",term)
     # elif is_rational_value(term):
     #     print("rational value is:",term)
     #     # constants.add(term.as_long())
@@ -24,11 +94,11 @@ a = Int('x')
 b = IntVal(5)
 
 # Check if x has a discrete value
-print(is_int_value(a))
+# print(is_int_value(a))
     
 
 # Check if z has a discrete value
-print(is_int_value(b))
+# print(is_int_value(b))
     
 
 # print(is_int(IntVal('z')))

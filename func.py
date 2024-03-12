@@ -60,12 +60,89 @@ def array_check_for_match(array1, array2):
 #     return python_formula
 
 def is_number(num):
+    
     if is_int_value(num):
         return True
     elif is_rational_value(num):
         return True
     else:
         return False
+    
+def is_comperison_operator(op):
+    if is_lt(op): #<
+        return True
+    if is_gt(op): #>
+        return True
+    if is_le(op): #<=
+        return True
+    if is_ge(op): #>=
+        return True
+    if is_eq(op): #==
+        return True
+    else:
+        return False
+    
+    
+def is_arithmetic_operator(op):
+    if is_add(op): #+
+        return True 
+    if is_sub(op): #-
+        return True
+    if is_mul(op): #*
+        return True
+    if (is_div(op) or is_idiv(op) ): #/
+        return True
+    if is_mod(op): #%
+        return True
+    else:
+        return False
+
+# comparison_operators = ['==', '>', '<', '>=', '<=']
+def replace_comparison_decl(expr, new_op):
+    # Ensure the expression is a comparison operation
+    if not is_expr(expr) or not expr.decl().arity() == 2 or not expr.decl().kind() in [Z3_OP_GT, Z3_OP_LT, Z3_OP_GE, Z3_OP_LE, Z3_OP_EQ]:
+        raise ValueError("Expression is not a binary comparison operation")
+    
+    # Extract operands
+    lhs, rhs = expr.children()
+    
+    # Apply the new operator
+    if new_op == "==":
+        return lhs == rhs
+    elif new_op == ">":
+        return lhs > rhs
+    elif new_op == "<":
+        return lhs < rhs
+    elif new_op == ">=":
+        return lhs >= rhs
+    elif new_op == "<=":
+        return lhs <= rhs
+    else:
+        raise ValueError("Unsupported operator")
+
+# arithmetic_operators = ['+', '-', '*', '/', '%']
+def replace_arithmetic_decl(expr, new_op):
+    # Ensure the expression is a arithmetic operation
+    if not is_expr(expr) or not expr.decl().arity() == 2 or not expr.decl().kind() in [Z3_OP_ADD, Z3_OP_SUB, Z3_OP_MUL, Z3_OP_DIV, Z3_OP_IDIV, Z3_OP_MOD ]: #arity is number of parameters
+        raise ValueError("Expression is not a binary Arithmetic operation")
+    
+    # Extract operands
+    lhs, rhs = expr.children()
+    
+    # Apply the new operator
+    if new_op == "+":
+        return lhs + rhs
+    elif new_op == "-":
+        return lhs - rhs
+    elif new_op == "*":
+        return lhs * rhs
+    elif new_op == "/":
+        return lhs / rhs
+    elif new_op == "%":
+        return lhs % rhs
+    else:
+        raise ValueError("Unsupported operator")
+
     
     
 def extract_constants_and_assertions_with_datatypes(formula_string):

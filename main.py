@@ -5,7 +5,7 @@ from func import *
 
 # Read the SMT-LIB formula from a text file
 try:
-    file_path = './formula/formula30.txt';
+    file_path = './formula/formula2.txt';
     with open(file_path, 'r') as file:
         formula_string = file.read()
 except Exception as e:

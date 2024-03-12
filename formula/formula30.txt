@@ -4,6 +4,7 @@
 (declare-const lightning Int)
 (declare-const solution Int)
 
+
 (assert (= 12 (+ (- doubleRainbow rainbow) rainbow)))
 (assert (= 4 (- (- doubleRainbow rain) rain)))
 (assert (= 22 (- (* rain rainbow) lightning)))

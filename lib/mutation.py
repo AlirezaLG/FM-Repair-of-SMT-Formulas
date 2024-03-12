@@ -8,7 +8,7 @@ class MutationTesting:
         # Initialize MutationTesting class
         self.mutation_types = ["replace_operator"] # replace_constant, replace_operator, delete_assertion
         self.mutation_number = 0
-        
+        self.old_expr = []
 
     
     # mutant for each unsat [a1, a4]
@@ -32,18 +32,18 @@ class MutationTesting:
         
         if mutation_type == "replace_constant":
             # replace constant
-            print_d("*** Replace constant method ***")
+            print_d("*** Replace Constant Mutation ***")
             self.replace_constant(assertion, assertion_index)
             
         elif mutation_type == "replace_operator":
             # replace operator
-            print_d("*** Replace operator method ***")
+            print_d("*** Replace Operator Mutation ***")
             self.replace_operator(assertion, assertion_index)
             
             
         elif mutation_type == "delete_assertion":
             # delete subformula
-            print_d("Delete assertion method\n")
+            print_d("Delete Assertion Mutation")
             self.delete_assertion(assertion, assertion_index)
             
     
@@ -65,50 +65,19 @@ class MutationTesting:
     # replace only one operator at the time 
     def replace_operator(self, assertion, unsat_index):
         
-        # Find Arithmetic operator
-        asserts = assertion.copy()
-        words = str(asserts[unsat_index]).split()
-        start_time = time.time()
-        print_d("Arithmetic operators: ")
-        if array_check_for_match(words, arithmetic_operators):
-            for i, word in enumerate(words):
-                if word in arithmetic_operators:
-                    print_d("Found operator[", word,"]")
-                    for op in arithmetic_operators:
-                        orginal_operand = word
-                        if (word != op): #we dont want to check assertion with same operator
-                            words[i] =  word.replace(word, op)
-                            print_d("New Assertions is: "," ".join(words));
-                            asserts[unsat_index] = Bool(" ".join(words))
-                            self.check_sat(asserts, start_time)
-                            words[i] = orginal_operand
-        else:
-            print_d("No arithmetic operator found\n")
+        print_d("** Replace arithmetic method **")
+        asserts = assertion.copy() # make a new copy, old copy is modified
+        expr = asserts[unsat_index][0]
+        self.find_arithmetic_operators(asserts, expr, unsat_index)
+        # self.replace_arithmetic_operator(assertion, unsat_index)
+        
+        # self.replace_comparison_operator(assertion, unsat_index)
+        
                 
-        # Find Comparison operator
+        # Find Logical operator 
         start_time = time.time()
         asserts = assertion.copy() # make a new copy, old copy is modified
-        words = str(asserts[unsat_index]).split()
-        print_d("Comparison operators: ")
-        if array_check_for_match(words, comparison_operators):
-            for i, word in enumerate(words):
-                if word in comparison_operators:
-                    print_d("found operator", word)
-                    for op in comparison_operators:
-                        orginal_operand = word
-                        if (word != op): #we dont want to check assertion with same operator
-                            words[i] =  word.replace(word, op)
-                            print_d("New Assertions is: "," ".join(words));
-                            asserts[unsat_index] = bool(" ".join(words))
-                            self.check_sat(asserts, start_time)
-                            words[i] = orginal_operand
-        else:
-            print_d("No comparison operator found\n")
-                
-        # Find Logical operator
-        start_time = time.time()
-        asserts = assertion.copy() # make a new copy, old copy is modified
-        print_d("Logical operators:")
+        print_d("** Logical operators method **")
         if (contains_logical_operators(assertion[unsat_index][0])):
             print_d("Default unsat bool index is: ",assertion[unsat_index][0] ,"\n")
             # check for the first logical operator
@@ -119,8 +88,95 @@ class MutationTesting:
         else :
             print_d("No logical operator found\n")
 
-        # return string
-       
+    # def find_logical_operators(self, asserts, expr ,unsat_index):
+    #     # Base case: if the expression is a constant or a simple variable, return
+    #     if  not expr.decl().arity() == 2 or is_const(expr) or is_var(expr) :
+    #         return 
+    #     # print("-----------------")
+    #     self.old_expr.append(expr)
+    #     # print("expr is ",expr.decl().arity())
+    #     # print('length old_expr is:\t',len(self.old_expr)-1)
+    #     # for old in self.old_expr:
+    #     #     print("old is ",old)
+    #     # print("\n")
+        
+    #     # Check if the expression is an arithmetic operator
+    #     if expr.decl().kind() in [Z3_OP_ADD, Z3_OP_SUB, Z3_OP_MUL, Z3_OP_DIV, Z3_OP_MOD, Z3_OP_IDIV]:
+    #         for op in arithmetic_operators:
+    #             if (str(expr.decl()) != op):
+    #                 start_time = time.time()
+    #                 # replace new operator with the old one for nested expression
+    #                 if (len(self.old_expr) > 1):
+    #                     asserts[unsat_index] = substitute(self.old_expr[0], (self.old_expr[len(self.old_expr)-1] , replace_arithmetic_decl(expr, op) ))
+    #                 #if it is not nested expression
+    #                 else:
+    #                     asserts[unsat_index] = replace_arithmetic_decl(expr, op)
+    #                 print_d("asserts[unsat_index] is:\t", asserts[unsat_index] )
+    #                 # print("new assert is: \t",replace_arithmetic_decl(expr, op),' \n')
+    #                 # print_d("assert is:", asserts )
+    #                 self.check_sat(asserts, start_time)
+        
+    #     # Recursively check the arguments of the expression
+    #     for arg in expr.children():
+    #         self.find_arithmetic_operators(asserts ,arg ,unsat_index)
+
+
+
+    def find_arithmetic_operators(self, asserts, expr ,unsat_index):
+        # Base case: if the expression is a constant or a simple variable, return
+        if  not expr.decl().arity() == 2 or is_const(expr) or is_var(expr) :
+            return 
+        # print("-----------------")
+        self.old_expr.append(expr)
+        # print("expr is ",expr.decl().arity())
+        # print('length old_expr is:\t',len(self.old_expr)-1)
+        # for old in self.old_expr:
+        #     print("old is ",old)
+        # print("\n")
+        
+        # Check if the expression is an arithmetic operator
+        if expr.decl().kind() in [Z3_OP_ADD, Z3_OP_SUB, Z3_OP_MUL, Z3_OP_DIV, Z3_OP_MOD, Z3_OP_IDIV]:
+            for op in arithmetic_operators:
+                if (str(expr.decl()) != op):
+                    start_time = time.time()
+                    # replace new operator with the old one for nested expression
+                    if (len(self.old_expr) > 1):
+                        asserts[unsat_index] = substitute(self.old_expr[0], (self.old_expr[len(self.old_expr)-1] , replace_arithmetic_decl(expr, op) ))
+                    #if it is not nested expression
+                    else:
+                        asserts[unsat_index] = replace_arithmetic_decl(expr, op)
+                    print_d("asserts[unsat_index] is:\t", asserts[unsat_index] )
+                    # print("new assert is: \t",replace_arithmetic_decl(expr, op),' \n')
+                    # print_d("assert is:", asserts )
+                    self.check_sat(asserts, start_time)
+        
+        # Recursively check the arguments of the expression
+        for arg in expr.children():
+            self.find_arithmetic_operators(asserts ,arg ,unsat_index)
+
+
+        
+        
+        
+        
+        
+    
+        
+    def replace_comparison_operator(self ,assertion, unsat_index):
+        # Find Comparison operator
+        print_d("** Replace comparison method **")
+        start_time = time.time()
+        asserts = assertion.copy() # make a new copy, old copy is modified
+        expr = assertion[unsat_index][0]
+        if (is_comperison_operator(expr)):
+            for op in comparison_operators:
+                if (str(expr.decl()) != op):
+                    asserts[unsat_index] = replace_comparison_decl(expr, op)
+                    print_d("Comparison operators: [", op, "] " , asserts[unsat_index] )
+                    self.check_sat(asserts, start_time)
+        else:
+            print_d("No comparison operator found\n")
+        
    
     # replace constant
     def replace_constant(self ,assertion, unsat_index):
