@@ -1,12 +1,12 @@
 from z3 import *
 
-x, y = BitVecs('x y', 32)
+# x, y = BitVecs('x y', 32)
 
-solve(x >> 2 == 3)
+# solve(x >> 2 == 3)
 
-solve(x << 2 == 3)
+# solve(x << 2 == 3)
 
-solve(x << 2 == 24)
+# solve(x << 2 == 24)
 
 # x = BitVec('x', 16)
 
@@ -27,20 +27,23 @@ solve(x << 2 == 24)
 # for d in m.decls():
 #     print ("%s = %s" % (d.name(), m[d]))
     
-# x = Real('x')
-# y = Real('y')
-# s = Solver()
-# s.add(x > 1, y > 1, Or(x + y > 3, x - y < 2))
-# print ("asserted constraints...")
-# for c in s.assertions():
-#     print (c)
+x = Real('x')
+y = Real('y')
+z = Real('z')
+s = Solver()
+s.add(x > 1, y > 1, Or(x + y > 3, x - y < 2), x**3000000000 == z)
 
-# print (s.check())
-# print ("statistics for the last check method...")
-# print (s.statistics())
-# # Traversing statistics
-# for k, v in s.statistics():
-#     print ("%s : %s" % (k, v))
+print ("asserted constraints...")
+for c in s.assertions():
+    print (c)
+
+print (s.check())
+
+print ("statistics for the last check method...")
+print (s.statistics())
+# Traversing statistics
+for k, v in s.statistics():
+    print ("%s : %s" % (k, v))
 
 
 # x = Int('x')

@@ -1,5 +1,5 @@
 (declare-const x Int)
 (declare-const y Int)
-(assert (>= x 0))
-(assert (>= y 15))
+(assert (>= x 6))
+(assert (>= y 5))
 (assert (= (+ x y) 10))

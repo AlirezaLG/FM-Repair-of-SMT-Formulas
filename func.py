@@ -1,6 +1,7 @@
 from z3 import * 
 from config import *
 
+
 def replace_logical_operators(expr):
     # expr = Bool(str(expr))
     if is_and(expr):
@@ -37,34 +38,40 @@ def array_check_for_match(array1, array2):
     else:
         return False  # No match found
 
-def convert_SMTlib_to_Z3Solver(smtlib_formula, index):
-    # Split the formula into parts
-    parts = smtlib_formula.strip().split()
-    for part in parts:
-        print("part " +part)
-    # Extract the operator and operands
-    operator = parts[0]
-    # print('line '+str(index)+" operator " +operator)
-    operands = parts[1:]
-    # for operand in operands:
-    #     print('line '+str(index)+" operand " +operand)
-    # Convert operator and operands to Python/Z3 format
-    python_formula = ""
-    if operator == ">":
-        python_formula = f"{operands[0]} + {operands[1]} < {operands[2]}"
-    elif operator == "<":
-        python_formula = f"{operands[0]} + {operands[1]} > {operands[2]}"
-    # Add support for other operators as needed...
+# def convert_SMTlib_to_Z3Solver(smtlib_formula, index):
+#     # Split the formula into parts
+#     parts = smtlib_formula.strip().split()
+#     for part in parts:
+#         print("part " +part)
+#     # Extract the operator and operands
+#     operator = parts[0]
+#     # print('line '+str(index)+" operator " +operator)
+#     operands = parts[1:]
+#     # for operand in operands:
+#     #     print('line '+str(index)+" operand " +operand)
+#     # Convert operator and operands to Python/Z3 format
+#     python_formula = ""
+#     if operator == ">":
+#         python_formula = f"{operands[0]} + {operands[1]} < {operands[2]}"
+#     elif operator == "<":
+#         python_formula = f"{operands[0]} + {operands[1]} > {operands[2]}"
+#     # Add support for other operators as needed...
 
-    return python_formula
+#     return python_formula
 
-
+def is_number(num):
+    if is_int_value(num):
+        return True
+    elif is_rational_value(num):
+        return True
+    else:
+        return False
+    
+    
 def extract_constants_and_assertions_with_datatypes(formula_string):
     constants = {}
     assertions = []
-
     lines = formula_string.split('\n')
-
     for line in lines:
         if line.startswith('(declare-const'):
             parts = line.split()
@@ -79,9 +86,9 @@ def extract_constants_and_assertions_with_datatypes(formula_string):
         elif line.startswith('(assert'):
             assertions.append(line)
             # assertions.append(line[8:-1])
-            
+    return constants, assertions   
 
-    return constants, assertions
+#     return constants, assertions
 # print works only on Development mode
 def print_d(*args, **kwargs):
     if dev:
@@ -91,3 +98,5 @@ def print_d(*args, **kwargs):
 def print_p(*args, **kwargs):
     if dev == False:
         print(*args, **kwargs)
+        
+

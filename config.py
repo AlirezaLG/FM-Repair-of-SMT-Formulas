@@ -1,6 +1,6 @@
 
 arithmetic_operators = ['+', '-', '*', '/', '%']
-comparison_operators = ['=', '!=', '>', '<', '>=', '<=']
+comparison_operators = ['==','=', '!=', '>', '<', '>=', '<=']
 logical_operators = ['and', 'or', 'not']
 
 mutation_orders = ['delete_assertion','replace_constant', 'replace_operator']

@@ -1,31 +1,30 @@
 from z3 import *
-from unsatcore.unsat import * 
-from mutation.mutation import * 
+from lib.unsat import * 
+from lib.mutation import * 
 from func import *
-import cProfile
-import pstats
 
 # Read the SMT-LIB formula from a text file
-file_path = './formula/formula20.txt';
-with open(file_path, 'r') as file:
-    formula_string = file.read()
+try:
+    file_path = './formula/formula30.txt';
+    with open(file_path, 'r') as file:
+        formula_string = file.read()
+except Exception as e:
+    print("Error in Reading file :", e , "\n")
+    sys.exit()  
+
 
 # Call the function to extract constants with data types and assertions
 constants, SMTLIB_assertions = extract_constants_and_assertions_with_datatypes(formula_string)
 
-# Create a solver
-solver = Solver()
 
 # Declare constants alonside their data types
 context = {}
 for constant, datatype in constants.items():
     context[constant] = eval(datatype)(constant) # {'x': x, 'y': y}
 
-print("constants are: ", context);
 
 # Convert SMT-LIB[QF-LIA] to FOL 
 assertions = []
-
 for SMTLIB_assertion in SMTLIB_assertions:
     try:
         assertions.append(parse_smt2_string(SMTLIB_assertion, decls=context))
@@ -34,30 +33,28 @@ for SMTLIB_assertion in SMTLIB_assertions:
         sys.exit()  
 
 
+print("\nYou are in:\t", mode, "mode")
+print_d("constants are:\t", context);
+print_d("-------------------------------");
+# Create a solver
+solver = Solver()
 solver.add(assertions)
-print_d("assertions are: ", assertions[2])
 
-exit()
-# check mode
-print("You are in: ", mode, "mode \n ")
-# with cProfile.Profile() as pr:
-    # Check for satisfiability
+
+# Check for satisfiability
 if solver.check() == sat:
     model = solver.model()
-    print("Formula is sat \nour model is:\n",model,'\n')
-    print_p("Sat and New SMT-LIB formula is: \n"+ solver.sexpr() + "\n")
-    
+    print("Formula is SAT and Our model is:\n",model)
+    print("SMT-LIB formula is: \n"+ solver.to_smt2())
+   
 elif solver.check() == unsat:
     # check the unsat core
     unsat = UnsatCoreChecker()
     unsat_result = unsat.check_unsat_core(solver)
-    print("Formula is unsat \nunsat core at:"+ str(unsat_result) + "\n")
+    print("Formula is UnSAT core at:\t"+ str(unsat_result))
     
     # check the mutation
     mutation = MutationTesting()
-    new_solver = mutation.mutant_each_unsat(assertions, unsat_result)
-    # print("\nMutation result is:\n"+ str(new_solver.to_smt2) + "\n")
+    mutation.mutant_each_unsat(assertions, unsat_result)
 else:
     print("The formula is unknown.") 
-# result = pstats.Stats(pr).sort_stats('cumulative')
-# result.print_stats(10)

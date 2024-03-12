@@ -1,12 +1,42 @@
 from z3 import *
 
-s = Solver()
-p = Bool('p')
-assertion = parse_smt2_string('and(p, or(p, not(p)))')
+# Create variables
+x, y = Ints('x y')
 
-s.add(assertion)
-print(s.check())
-print(s.model())
+# Define the assertion
+assertion = (x - 2)+y > 10
+
+# Extract constant values
+constants = set()
+
+for term in assertion.children():
+    print("term is:",term)
+    if is_int_value(term):
+        print("int value is:",term)
+    # elif is_rational_value(term):
+    #     print("rational value is:",term)
+    #     # constants.add(term.as_long())
+
+# print("Constant values in the assertion:", constants)
+
+# Define Z3 variables
+a = Int('x')
+b = IntVal(5)
+
+# Check if x has a discrete value
+print(is_int_value(a))
+    
+
+# Check if z has a discrete value
+print(is_int_value(b))
+    
+
+# print(is_int(IntVal('z')))
+
+# print(substitute(x + 1, (x, y + 1)))
+# s.add(assertion)
+# print(s.check())
+# print(s.model())
 # # from func import *
 
 # from z3 import *
