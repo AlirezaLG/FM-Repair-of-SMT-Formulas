@@ -17,16 +17,16 @@ def replace_logical_operators(expr):
         # If it's not a logical operator, return as it is
         return expr
 
-def contains_logical_operators(expr):
-    if is_and(expr) or is_or(expr) or is_not(expr):
-        return True
-    elif is_const(expr):
-        return False
-    else:
-        for child in expr.children():
-            if contains_logical_operators(child):
-                return True
-    return False
+# def contains_logical_operators(expr):
+#     if is_and(expr) or is_or(expr) or is_not(expr):
+#         return True
+#     elif is_const(expr):
+#         return False
+#     else:
+#         for child in expr.children():
+#             if contains_logical_operators(child):
+#                 return True
+#     return False
 
 def array_check_for_match(array1, array2):
     set1 = set(array1)
@@ -60,7 +60,6 @@ def array_check_for_match(array1, array2):
 #     return python_formula
 
 def is_number(num):
-    
     if is_int_value(num):
         return True
     elif is_rational_value(num):
@@ -123,12 +122,13 @@ def replace_comparison_decl(expr, new_op):
 # arithmetic_operators = ['+', '-', '*', '/', '%']
 def replace_arithmetic_decl(expr, new_op):
     # Ensure the expression is a arithmetic operation
-    if not is_expr(expr) or not expr.decl().arity() == 2 or not expr.decl().kind() in [Z3_OP_ADD, Z3_OP_SUB, Z3_OP_MUL, Z3_OP_DIV, Z3_OP_IDIV, Z3_OP_MOD ]: #arity is number of parameters
+    if not is_expr(expr) or not expr.decl().arity() == 2 or not expr.decl().kind() in [Z3_OP_ADD, Z3_OP_SUB, Z3_OP_MUL, Z3_OP_DIV, Z3_OP_IDIV ]: #arity is number of parameters
         raise ValueError("Expression is not a binary Arithmetic operation")
     
     # Extract operands
     lhs, rhs = expr.children()
-    
+    # print("lhs is ",type(lhs))
+    # print("rhs is ",type(rhs))    
     # Apply the new operator
     if new_op == "+":
         return lhs + rhs
@@ -138,8 +138,8 @@ def replace_arithmetic_decl(expr, new_op):
         return lhs * rhs
     elif new_op == "/":
         return lhs / rhs
-    elif new_op == "%":
-        return lhs % rhs
+    # elif new_op == "%":
+    #     return lhs % rhs
     else:
         raise ValueError("Unsupported operator")
 

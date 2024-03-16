@@ -1,10 +1,56 @@
 from z3 import *
 
+# import z3
+
+# # Create a solver
+# solver = z3.Solver()
+
+# # Add some constraints
+# x = z3.Int('x')
+# y = z3.Int('y')
+# solver.add(x > 0)
+# solver.add(y < 10)
+# solver.add(x + y == 15)
+
+# # Check satisfiability
+# result = solver.check()
+
+# # Print the result
+# print("Result:", result)
+
+# # Access and print statistics
+# print("\nStatistics:")
+# for key, value in solver.statistics():
+#     print("- {}: {}".format(key, value))
+
+
+
+# # Declare a boolean constant
+# p = Bool('p')
+
+# # Define the assertion
+# assertion = Or(p, Not(p))
+
+# # Create a solver
+# solver = Solver()
+
+# # Add the assertion to the solver
+# solver.add(assertion)
+
+# # Check if the assertion is satisfiable
+# if solver.check() == sat:
+#     # Get the model
+#     model = solver.model()
+#     # Display the model
+#     print(model)
+# else:
+#     print("Assertion is unsatisfiable")
+    
 x = Int('x')
 y = Int('y')
 n = x + y >= 3
 print ("num args: ", n.num_args())
-print ("children: ", n.children())
+print ("children: ", n.children()[0])
 print ("1st child:", n.arg(0))
 print ("2nd child:", n.arg(1))
 print ("operator: ", n.decl())
