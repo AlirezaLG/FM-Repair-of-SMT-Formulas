@@ -56,14 +56,19 @@ class Preprocessor:
     def count_operators(self,expr):
         # print("-------------------")
         # print("arity :\t", expr.decl().arity())
+        # print("expr:\t", expr)
         # print("is const:\t", is_const(expr))
         # print("is var:\t", is_var(expr))
+        # print("arg 0:\t", expr.arg(0))
+        # print("arg 1:\t", expr.arg(1))
         
         for arg in expr.children():
             if is_number(arg):
                 self.const_numbers.append(arg)
         
-        if  not expr.decl().arity() == 2  :
+            
+        if expr.decl().arity() == 0  :
+                
             self.operators = {tuple(self.arith_op), tuple(self.logic_op), tuple(self.comp_op), tuple(self.const_numbers)}
             return 
         
@@ -74,6 +79,12 @@ class Preprocessor:
         # count logical operators
         if expr.decl().kind() in [Z3_OP_AND, Z3_OP_OR, Z3_OP_NOT]:
             self.logic_op.append(expr.decl())
+        
+        # if expr.decl().arity() == 1 and is_expr(expr): #not(a) toReal(20)
+        #         if expr.decl().kind() in [Z3_OP_NOT]:
+        #             self.logic_op.append(expr.decl())
+                # elif is_number(expr):
+                #      self.arith_op.append(expr.decl())
         
         # count comparison operators
         if expr.decl().kind() in [Z3_OP_LT, Z3_OP_GT, Z3_OP_LE, Z3_OP_GE, Z3_OP_EQ]:

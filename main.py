@@ -5,8 +5,10 @@ from func import *
 from lib.preprocessor import *
 
 # Read the SMT-LIB formula from a text file
+
+
 try:
-    file_path = './formula/formula9.txt';
+    file_path = './formula/formula31.txt';
     with open(file_path, 'r') as file:
         formula_string = file.read()
 except Exception as e:
@@ -47,7 +49,7 @@ solver.add(assertions)
 if solver.check() == sat:
     model = solver.model()
     print("Formula is SAT and Our model is:\n",model)
-    print("SMT-LIB formula is: \n"+ solver.to_smt2())
+    print_p("SMT-LIB formula is: \n"+ solver.to_smt2())
    
 elif solver.check() == unsat:
     # check the unsat core

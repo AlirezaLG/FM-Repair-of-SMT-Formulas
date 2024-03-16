@@ -30,6 +30,7 @@ class MutationTesting:
                     self.replace_constant(assertion, assertion[index][0] , index)
                     
                 elif mutation_type == "replace_operator":
+                    self.old_logical_expr = []
                     print_d("*** Replace Operator Mutation ***\n")
                     self.replace_operator(assertion, index)
                     
@@ -55,7 +56,8 @@ class MutationTesting:
             
             elif op_name == "find_comparison_operators":
                 print_d("** Find comparison method **")
-                self.find_comparison_operators(asserts, unsat_index)
+                expr = asserts[unsat_index] if is_expr(asserts[unsat_index]) else asserts[unsat_index][0]
+                self.find_comparison_operators(asserts, expr,unsat_index)
             
             elif op_name == "find_logical_operators":
                 print_d("** Find logical method **")
@@ -89,7 +91,7 @@ class MutationTesting:
         
         # Check if the expression is an arithmetic operator
         if expr.decl().kind() in [Z3_OP_AND, Z3_OP_OR, Z3_OP_NOT]:
-            # print_d("Default unsat bool index is: ",expr ,"\n")
+            print_d("Found logical op:\t [", expr.decl() ,"]")
             # check for the first logical operator
             start_time = time.time()
             if (len(self.old_logical_expr) > 1):
@@ -109,23 +111,27 @@ class MutationTesting:
     def replace_constant(self ,asserts, expr, unsat_index):
         
         
-        self.old_expr.append(expr)
         
+        self.old_expr.append(expr)
+        # print_d("main expr is: ",expr)
         for term in expr.children():
             # print_d("term is: ",term)
-            # print_d("arity", term.decl().arity())
             
             # if it is a unary operator like toReal(x) 
-            if term.decl().arity() == 1:  
-                term = term.children()[0]
+            # if term.decl().arity() == 1:  
+            #     term = term.children()[0]
                 # print_d("new term with arity 1: ", term)
                 # print_d("is number", is_number(term))
             
             if (is_const(term) and is_number(term)): # (not a) is not allowed 
+                # print_d("term inside: \t",term)
+                # print_d("arity inside ", term.decl().arity())
+                # print_d("inside the loop")
                 if (len(self.old_expr) > 1):
+                    # print("stack sizeL: ",len(self.old_expr))
                     # print_d("index 0 \t",self.old_expr[0])
                     # print_d("last -1 index is:\t", self.old_expr[len(self.old_expr)-1]);
-                    # print_d("expr: \t",expr)
+                    
                     
                     XX = Real('X') if is_rational_value(term) else Int('X')
                     last_index = substitute(self.old_expr[len(self.old_expr)-1] ,(term, XX))
@@ -141,16 +147,17 @@ class MutationTesting:
                 
                 
         # end the recursion; 
-        # if  not expr.decl().arity() == 2  :
-        #     return
+        if  expr.decl().arity() == 0  :
+            return
         
+        # print_d("expr before recursion is: ",expr)   
         for arg in expr.children():
             self.replace_constant(asserts ,arg ,unsat_index)
         
      
     def find_arithmetic_operators(self, asserts, expr ,unsat_index):
         # Base case: if the expression is a constant or a simple variable, return
-        if  not expr.decl().arity() == 2 or is_const(expr) or is_var(expr) :
+        if  expr.decl().arity() == 0 or is_const(expr)  :
             return 
         # print("-----------------")
         self.old_expr.append(expr)
@@ -164,7 +171,8 @@ class MutationTesting:
         if expr.decl().kind() in [Z3_OP_ADD, Z3_OP_SUB, Z3_OP_MUL, Z3_OP_DIV, Z3_OP_MOD, Z3_OP_IDIV]:
             for op in arithmetic_operators:
                 if (str(expr.decl()) != op):
-                    print_d("operator is: ",op )
+                    print("Found Operator:\t [",expr.decl(),']')
+                    # print_d("operator is: ",op )
                     start_time = time.time()
                     # replace new operator with the old one for nested expression
                     if (len(self.old_expr) > 1):
@@ -187,22 +195,22 @@ class MutationTesting:
             self.find_arithmetic_operators(asserts ,arg ,unsat_index)
 
         
-    def find_comparison_operators(self ,assertion, unsat_index):
+    def find_comparison_operators(self ,asserts, expr, unsat_index):
         # Find Comparison operator
-        start_time = time.time()
-        asserts = assertion.copy() # make a new copy, old copy is modified
-        expr = asserts[unsat_index] if is_expr(asserts[unsat_index]) else asserts[unsat_index][0]
+        
+        if expr.decl().arity() == 0 or is_const(expr)  :
+            return
         
         if (is_comperison_operator(expr)):
             for op in comparison_operators:
                 if (str(expr.decl()) != op):
                     asserts[unsat_index] = replace_comparison_decl(expr, op)
                     print_d("Comparison operators: [", op, "] " , asserts[unsat_index] )
+                    start_time = time.time()
                     self.check_sat(asserts, start_time)
-        else:
-            print_d("No comparison operator found\n")
+        for arg in expr.children():
+            self.find_comparison_operators(asserts ,arg ,unsat_index)
         
-   
            
 
     # check the satisfiability
