@@ -1,6 +1,6 @@
 from z3 import *
-
 # import z3
+
 
 # # Create a solver
 # solver = z3.Solver()
@@ -46,15 +46,41 @@ from z3 import *
 # else:
 #     print("Assertion is unsatisfiable")
     
+# x = Int('x')
+# y = Int('y')
+# n = x + y >= 3
+# x = 20
 x = Int('x')
 y = Int('y')
-n = x + y >= 3
-print ("num args: ", n.num_args())
-print ("children: ", n.children()[0])
-print ("1st child:", n.arg(0))
-print ("2nd child:", n.arg(1))
-print ("operator: ", n.decl())
-print ("op name:  ", n.decl().name())
+asserts = "(assert (= (/ x (* 2 y)) 20))"
+assertion = parse_smt2_string(asserts, decls={"x": x, "y": y})
+print("is expr", is_expr(assertion[0].arg(1)))
+print("is const", is_const(assertion[0].arg(1)))
+print("is const", is_const(assertion[0].arg(1).arg(0)) )
+print("main assertion is: ",assertion[0].arg(1).arg(0))
+
+
+# The right-hand side of the equality expression, where the number 20 is located
+
+# print("rhs value:", rhs)
+for term in assertion[0].children():
+    if isinstance(term, ArithRef):
+        # Check if the term is a division operation
+        if is_div(term):
+            # Access the numerator of the division
+            numerator = term.children()[0]
+            if is_const(numerator):
+                constant_value = numerator.as_long()
+                print("Constant value:", constant_value)
+
+
+
+# print ("num args: ", n.num_args())
+# print ("children: ", n.children()[0])
+# print ("1st child:", n.arg(0))
+# print ("2nd child:", n.arg(1))
+# print ("operator: ", n.decl())
+# print ("op name:  ", n.decl().name())
 
 # def find_arithmetic_operators(expr):
 #     # Base case: if the expression is a constant or a simple variable, return

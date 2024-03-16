@@ -64,6 +64,9 @@ def is_number(num):
         return True
     elif is_rational_value(num):
         return True
+    elif isinstance(num, float):
+        return True
+    
     else:
         return False
     

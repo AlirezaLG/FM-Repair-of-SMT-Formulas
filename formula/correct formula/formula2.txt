@@ -1,2 +1,0 @@
-(declare-const p Bool)
-(assert ( or p ( not p ))) 

@@ -47,6 +47,7 @@ class Preprocessor:
         print_d("Logical operators numbers:\t", len(self.logic_op))
         print_d("Comparison operators numbers:\t", len(self.comp_op))
         print_d("Constant numbers:\t", len(self.const_numbers))
+        print_d("Number of assertions:\t", len(assertion))
         print_d("Mutation orders are:\t", mutation_orders)
         print_d("Operator orders are:\t", operator_orders)
         print_d("**** END ****\n")

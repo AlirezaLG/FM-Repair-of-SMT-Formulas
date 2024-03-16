@@ -8,24 +8,26 @@ class MutationTesting:
         # Initialize MutationTesting class
         
         global result
-
+        
         # self.mutation_number = 0
         self.old_expr = []
         self.old_logical_expr = []
 
     
     # mutant for each unsat [a1, a4]
-    def mutant_each_unsat(self, assertion, unsat_core):
+    def mutant_each_unsat(self, assertions, unsat_core):
         for index in unsat_core:
             print_d("\n-------------------------------")
-            print_d("Unsat index:" + str(index) + "\t"+ str(assertion[index]))
+            print_d("Unsat index:" + str(index) + "\t"+ str(assertions[index]))
             print_d("-------------------------------")
             
             # implement different mutation types
             for mutation_type in mutation_orders:
+                assertion = assertions.copy()
                 if mutation_type == "replace_constant":
                     print_d("*** Replace Constant Mutation ***\n")
-                    self.replace_constant(assertion, index)
+                    self.old_expr = [] # clear the old expression
+                    self.replace_constant(assertion, assertion[index][0] , index)
                     
                 elif mutation_type == "replace_operator":
                     print_d("*** Replace Operator Mutation ***\n")
@@ -41,19 +43,25 @@ class MutationTesting:
     
     # replace only one operator at the time 
     def replace_operator(self, assertion, unsat_index):
-        asserts = assertion.copy() # make a new copy, old copy is modified
-        expr = asserts[unsat_index][0]
+        
+        
         # call the operator in custom order
         for op_name in operator_orders:
+            asserts = assertion.copy()
             if op_name == "find_arithmetic_operators":
                 print_d("** Find arithmetic method **")
+                expr = asserts[unsat_index][0]
                 self.find_arithmetic_operators(asserts, expr, unsat_index)
+            
             elif op_name == "find_comparison_operators":
                 print_d("** Find comparison method **")
-                self.find_comparison_operators(assertion, unsat_index)
+                self.find_comparison_operators(asserts, unsat_index)
+            
             elif op_name == "find_logical_operators":
                 print_d("** Find logical method **")
-                self.find_logical_operators(assertion, expr, unsat_index)
+                expr = asserts[unsat_index][0]
+                self.find_logical_operators(asserts, expr, unsat_index)
+            
             else:
                 print("no operator to call")
             
@@ -97,7 +105,49 @@ class MutationTesting:
             self.find_logical_operators(asserts ,arg ,unsat_index)
 
 
-
+    # replace constant
+    def replace_constant(self ,asserts, expr, unsat_index):
+        
+        
+        self.old_expr.append(expr)
+        
+        for term in expr.children():
+            # print_d("term is: ",term)
+            # print_d("arity", term.decl().arity())
+            
+            # if it is a unary operator like toReal(x) 
+            if term.decl().arity() == 1:  
+                term = term.children()[0]
+                # print_d("new term with arity 1: ", term)
+                # print_d("is number", is_number(term))
+            
+            if (is_const(term) and is_number(term)): # (not a) is not allowed 
+                if (len(self.old_expr) > 1):
+                    # print_d("index 0 \t",self.old_expr[0])
+                    # print_d("last -1 index is:\t", self.old_expr[len(self.old_expr)-1]);
+                    # print_d("expr: \t",expr)
+                    
+                    XX = Real('X') if is_rational_value(term) else Int('X')
+                    last_index = substitute(self.old_expr[len(self.old_expr)-1] ,(term, XX))
+                    asserts[unsat_index] = substitute(self.old_expr[0], (self.old_expr[len(self.old_expr)-1], last_index ))
+                    #if it is not nested expression
+                else:
+                    XX = Real('X') if is_rational_value(term) else Int('X')
+                    asserts[unsat_index] = substitute(asserts[unsat_index][0], (term, XX))
+                
+                start_time = time.time()
+                print_d("New Assertion is:\t",asserts[unsat_index])
+                self.check_sat(asserts, start_time)    
+                
+                
+        # end the recursion; 
+        # if  not expr.decl().arity() == 2  :
+        #     return
+        
+        for arg in expr.children():
+            self.replace_constant(asserts ,arg ,unsat_index)
+        
+     
     def find_arithmetic_operators(self, asserts, expr ,unsat_index):
         # Base case: if the expression is a constant or a simple variable, return
         if  not expr.decl().arity() == 2 or is_const(expr) or is_var(expr) :
@@ -141,8 +191,8 @@ class MutationTesting:
         # Find Comparison operator
         start_time = time.time()
         asserts = assertion.copy() # make a new copy, old copy is modified
-        print("assertion index: ",assertion[unsat_index][0])
-        expr = assertion[unsat_index][0]
+        expr = asserts[unsat_index] if is_expr(asserts[unsat_index]) else asserts[unsat_index][0]
+        
         if (is_comperison_operator(expr)):
             for op in comparison_operators:
                 if (str(expr.decl()) != op):
@@ -153,19 +203,7 @@ class MutationTesting:
             print_d("No comparison operator found\n")
         
    
-    # replace constant
-    def replace_constant(self ,assertion, unsat_index):
-        start_time = time.time()
-        asserts = assertion.copy()
-        for term in asserts[unsat_index][0].children():
-            # print("number: ",is_rational_value(term))
-            # print_d("term is: ",term)
-            if (is_number(term)):
-                XX = Real('X') if is_rational_value(term) else Int('X') 
-                asserts[unsat_index] = substitute(asserts[unsat_index][0], (term, XX))
-                print_d("New Assertion is:\t",asserts[unsat_index])
-                self.check_sat(asserts, start_time)
-            
+           
 
     # check the satisfiability
     def check_sat(self, asserts, start_time = 0):
@@ -177,9 +215,9 @@ class MutationTesting:
                 m = solver.model()
                 result.append(solver)
                 # self.mutation_number += 1
-                print_d("Sat and model is: \n"+ str(m)+ "\n")
-                print_p("Sat and New SMT-LIB formula is: \n"+ solver.to_smt2()) #sexpr
+                print_d("Sat and model is: \n"+ str(m))
                 print_d("Execution time in ms: ", round((time.time() - start_time) * 1000, 2)) 
+                print_p("Sat and New SMT-LIB formula is: \n"+ solver.to_smt2()) #sexpr
                 print_d("-----------------------------------")
             else:
                 print_d("unsat and failed to find a Model")
