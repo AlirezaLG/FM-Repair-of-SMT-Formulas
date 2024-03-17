@@ -68,11 +68,10 @@ class MutationTesting:
                 print("no operator to call")
             
     def delete_assertion(self, assertion, unsat_index):
-        start_time = time.time()
         asserts = assertion.copy()
         print_d("Deleted Assertion index is: ",str(asserts[unsat_index]))
         asserts.pop(unsat_index)
-        self.check_sat(asserts, start_time)
+        self.check_sat(asserts)
 
 
     def find_logical_operators(self, asserts, expr ,unsat_index):
@@ -93,14 +92,14 @@ class MutationTesting:
         if expr.decl().kind() in [Z3_OP_AND, Z3_OP_OR, Z3_OP_NOT]:
             print_d("Found logical op:\t [", expr.decl() ,"]")
             # check for the first logical operator
-            start_time = time.time()
+            
             if (len(self.old_logical_expr) > 1):
                 asserts[unsat_index] = substitute(self.old_logical_expr[0], (self.old_logical_expr[len(self.old_logical_expr)-1] , replace_logical_operators(expr) ))
             #if it is not nested expression
             else:
                 asserts[unsat_index] = replace_logical_operators(expr)
             print_d("revised assertions is: ",asserts[unsat_index])
-            self.check_sat(asserts, start_time)
+            self.check_sat(asserts)
             
         # Recursively check the arguments of the expression
         for arg in expr.children():
@@ -141,9 +140,8 @@ class MutationTesting:
                     XX = Real('X') if is_rational_value(term) else Int('X')
                     asserts[unsat_index] = substitute(asserts[unsat_index][0], (term, XX))
                 
-                start_time = time.time()
                 print_d("New Assertion is:\t",asserts[unsat_index])
-                self.check_sat(asserts, start_time)    
+                self.check_sat(asserts)    
                 
                 
         # end the recursion; 
@@ -171,9 +169,8 @@ class MutationTesting:
         if expr.decl().kind() in [Z3_OP_ADD, Z3_OP_SUB, Z3_OP_MUL, Z3_OP_DIV, Z3_OP_MOD, Z3_OP_IDIV]:
             for op in arithmetic_operators:
                 if (str(expr.decl()) != op):
-                    print("Found Operator:\t [",expr.decl(),']')
+                    print_d("Found Operator:\t [",expr.decl(),']')
                     # print_d("operator is: ",op )
-                    start_time = time.time()
                     # replace new operator with the old one for nested expression
                     if (len(self.old_expr) > 1):
                         # print_d("index 0: ",self.old_expr[0])
@@ -188,7 +185,7 @@ class MutationTesting:
                     print_d("asserts[unsat_index] is:\t", asserts[unsat_index] )
                     # print("new assert is: \t",replace_arithmetic_decl(expr, op),' \n')
                     # print_d("assert is:", asserts )
-                    self.check_sat(asserts, start_time)
+                    self.check_sat(asserts)
         
         # Recursively check the arguments of the expression
         for arg in expr.children():
@@ -206,15 +203,14 @@ class MutationTesting:
                 if (str(expr.decl()) != op):
                     asserts[unsat_index] = replace_comparison_decl(expr, op)
                     print_d("Comparison operators: [", op, "] " , asserts[unsat_index] )
-                    start_time = time.time()
-                    self.check_sat(asserts, start_time)
+                    self.check_sat(asserts)
         for arg in expr.children():
             self.find_comparison_operators(asserts ,arg ,unsat_index)
         
            
 
     # check the satisfiability
-    def check_sat(self, asserts, start_time = 0):
+    def check_sat(self, asserts):
         if(asserts != []):
             # print_d("asserts is: ", asserts)  
             solver = Solver()
@@ -224,7 +220,6 @@ class MutationTesting:
                 result.append(solver)
                 # self.mutation_number += 1
                 print_d("Sat and model is: \n"+ str(m))
-                print_d("Execution time in ms: ", round((time.time() - start_time) * 1000, 2)) 
                 print_p("Sat and New SMT-LIB formula is: \n"+ solver.to_smt2()) #sexpr
                 print_d("-----------------------------------")
             else:

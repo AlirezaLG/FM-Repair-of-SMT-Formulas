@@ -146,8 +146,7 @@ def replace_arithmetic_decl(expr, new_op):
     else:
         raise ValueError("Unsupported operator")
 
-    
-    
+  
 def extract_constants_and_assertions_with_datatypes(formula_string):
     constants = {}
     assertions = []
@@ -165,8 +164,40 @@ def extract_constants_and_assertions_with_datatypes(formula_string):
             constants[constant] = datatype[:-1]  # Remove the closing bracket
         elif line.startswith('(assert'):
             assertions.append(line)
-            # assertions.append(line[8:-1])
-    return constants, assertions   
+        elif 'Ints' in line:
+            # Handle the Ints('x y') format
+            vars_part = line.split('Ints(')[-1].split(')')[0].replace("'", "")
+            vars_list = vars_part.split()
+            for var in vars_list:
+                constants[var] = 'Int'
+        elif 'Reals' in line:
+            # Handle the Reals('x y') format
+            vars_part = line.split('Reals(')[-1].split(')')[0].replace("'", "")
+            vars_list = vars_part.split()
+            for var in vars_list:
+                constants[var] = 'Real'
+    return constants, assertions
+  
+    
+# def extract_constants_and_assertions_with_datatypes(formula_string):
+#     constants = {}
+#     assertions = []
+#     lines = formula_string.split('\n')
+#     for line in lines:
+#         if line.startswith('(declare-const'):
+#             parts = line.split()
+#             constant = parts[1]
+#             datatype = parts[2]
+#             constants[constant] = datatype[:-1]  # Remove the closing bracket
+#         elif line.startswith('(declare-fun'):
+#             parts = line.split()
+#             constant = parts[1]
+#             datatype = parts[3]
+#             constants[constant] = datatype[:-1]  # Remove the closing bracket
+#         elif line.startswith('(assert'):
+#             assertions.append(line)
+#             # assertions.append(line[8:-1])
+#     return constants, assertions   
 
 #     return constants, assertions
 # print works only on Development mode

@@ -8,7 +8,7 @@ from lib.preprocessor import *
 
 
 try:
-    file_path = './formula/formula31.txt';
+    file_path = './formula/formula30.txt';
     with open(file_path, 'r') as file:
         formula_string = file.read()
 except Exception as e:
@@ -25,6 +25,7 @@ constants, SMTLIB_assertions = extract_constants_and_assertions_with_datatypes(f
 context = {}
 for constant, datatype in constants.items():
     context[constant] = eval(datatype)(constant) # {'x': x, 'y': y}
+
 
 
 # Convert SMT-LIB[QF-LIA] to FOL 
@@ -66,10 +67,10 @@ elif solver.check() == unsat:
     mutation = MutationTesting()
     mutation.mutant_each_unsat(assertions, unsat_result)
     print("number of solution is", len(result))
-    # for solver in result:
-    #     for key, value in solver.statistics():
-    #         print("- {}: {}".format(key, value))
-    #     print("\n")
+    for solver in result:
+        for key, value in solver.statistics():
+            print("- {}: {}".format(key, value))
+        print("\n")
 
 else:
     print("The formula is unknown.") 
