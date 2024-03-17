@@ -2,8 +2,6 @@ from z3 import *
 from func import *
 
 class Preprocessor:
-    
-    
     def __init__(self):
         # Initialize MutationTesting class
         asserts = [] 
@@ -14,6 +12,33 @@ class Preprocessor:
         self.logic_op = []
         self.comp_op = []
         self.const_numbers = []
+
+    def count_operators(self,expr):
+        
+        for arg in expr.children():
+            if is_number(arg):
+                self.const_numbers.append(arg)
+        
+        # if the expression is a constant number
+        if expr.decl().arity() == 0  :
+            self.operators = {tuple(self.arith_op), tuple(self.logic_op), tuple(self.comp_op), tuple(self.const_numbers)}
+            return 
+        
+        # count arithmetic operators
+        if expr.decl().kind() in [Z3_OP_ADD, Z3_OP_SUB, Z3_OP_MUL, Z3_OP_DIV, Z3_OP_MOD, Z3_OP_IDIV]:
+           self.arith_op.append(expr.decl())
+        
+        # count logical operators
+        if expr.decl().kind() in [Z3_OP_AND, Z3_OP_OR, Z3_OP_NOT]:
+            self.logic_op.append(expr.decl())
+            
+    
+        # count comparison operators
+        if expr.decl().kind() in [Z3_OP_LT, Z3_OP_GT, Z3_OP_LE, Z3_OP_GE, Z3_OP_EQ]:
+            self.comp_op.append(expr.decl())
+        
+        for arg in expr.children():
+            self.count_operators( arg )
 
 
     def set_strategy(self, assertion, unsat_core):
@@ -52,46 +77,7 @@ class Preprocessor:
         print_d("**** END ****\n")
         
     
-    def count_operators(self,expr):
-        # print("-------------------")
-        # print("arity :\t", expr.decl().arity())
-        # print("expr:\t", expr)
-        # print("is const:\t", is_const(expr))
-        # print("is var:\t", is_var(expr))
-        # print("arg 0:\t", expr.arg(0))
-        # print("arg 1:\t", expr.arg(1))
-        
-        for arg in expr.children():
-            if is_number(arg):
-                self.const_numbers.append(arg)
-        
-            
-        if expr.decl().arity() == 0  :
-                
-            self.operators = {tuple(self.arith_op), tuple(self.logic_op), tuple(self.comp_op), tuple(self.const_numbers)}
-            return 
-        
-        # count arithmetic operators
-        if expr.decl().kind() in [Z3_OP_ADD, Z3_OP_SUB, Z3_OP_MUL, Z3_OP_DIV, Z3_OP_MOD, Z3_OP_IDIV]:
-           self.arith_op.append(expr.decl())
-        
-        # count logical operators
-        if expr.decl().kind() in [Z3_OP_AND, Z3_OP_OR, Z3_OP_NOT]:
-            self.logic_op.append(expr.decl())
-        
-        # if expr.decl().arity() == 1 and is_expr(expr): #not(a) toReal(20)
-        #         if expr.decl().kind() in [Z3_OP_NOT]:
-        #             self.logic_op.append(expr.decl())
-                # elif is_number(expr):
-                #      self.arith_op.append(expr.decl())
-        
-        # count comparison operators
-        if expr.decl().kind() in [Z3_OP_LT, Z3_OP_GT, Z3_OP_LE, Z3_OP_GE, Z3_OP_EQ]:
-            self.comp_op.append(expr.decl())
-        
-        for arg in expr.children():
-            self.count_operators( arg )
-
+    
         
     
     
