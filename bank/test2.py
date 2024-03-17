@@ -1,4 +1,131 @@
 from z3 import *
+
+# New dataset
+datasets = {
+    11: {':elim-unconstrained': 1, ':max-memory': 79.34, ':memory': 75.08, ':nlsat-propagations': 2, ':nlsat-stages': 3, ':num-allocs': 675596154, ':rlimit-count': 8961, ':solve-eqs-elim-vars': 4, ':solve-eqs-steps': 10, ':time': 0.04},
+    12: {':elim-unconstrained': 1, ':max-memory': 79.34, ':memory': 80.08, ':nlsat-propagations': 2, ':nlsat-stages': 3, ':num-allocs': 675596154, ':rlimit-count': 8961, ':solve-eqs-elim-vars': 4, ':solve-eqs-steps': 2, ':time': 0.09},
+    13: {':elim-unconstrained': 1, ':max-memory': 79.34, ':memory': 100.08, ':nlsat-propagations': 2, ':nlsat-stages': 3, ':num-allocs': 675596154, ':rlimit-count': 8961, ':solve-eqs-elim-vars': 4, ':solve-eqs-steps': 6, ':time': 0.01}
+}
+print(datasets.keys())
+key_list = list(datasets.keys())
+print(key_list[2])
+# print(datasets,'\n')
+# Define the weights based on priority
+weights = {':time': -1, ':memory': 1, ':solve-eqs-steps': 1}  # Negative weight for ':time' since lower is better
+
+# Normalize each parameter to [0, 1] and calculate the weighted score for each solution
+max_values = {key: max(entry[key] for entry in datasets.values()) for key in weights}
+min_values = {key: min(entry[key] for entry in datasets.values()) for key in weights}
+    
+def calculate_score(entry,  weights, dataset):
+    
+
+    score = 0
+    for key, weight in weights.items():
+        # Normalize the value to [0, 1] range
+        normalized_value = (entry[key] - min_values[key]) / (max_values[key] - min_values[key]) if max_values[key] != min_values[key] else 0
+        # Adjust score based on weight
+        score += weight * normalized_value if weight > 0 else -weight * (1 - normalized_value)
+    # print("Score for solution", entry, ":", score)
+    return score
+
+max_values = {key: max(entry[key] for entry in datasets.values()) for key in weights}
+min_values = {key: min(entry[key] for entry in datasets.values()) for key in weights}
+    
+# Sort solutions based on their scores
+sorted_solutions = sorted(datasets.items(), key=lambda item: calculate_score(item[1], weights ,datasets), reverse=True)
+
+# print("Solutions sorted by composite score:")
+# print(sorted_solutions)
+# for solution in sorted_solutions:
+#     print(solution)
+
+
+
+# # Define the dataset
+# solutions = {
+#     0: {'elim-unconstrained': 1, 'max-memory': 79.34, 'memory': 75.08, 'nlsat-propagations': 2, 'nlsat-stages': 3, 'num-allocs': 675596154, 'rlimit-count': 8961, 'solve-eqs-elim-vars': 4, 'solve-eqs-steps': 10, "time": 0.1},
+#     1: {'elim-unconstrained': 1, 'max-memory': 79.34, 'memory': 20.08, 'nlsat-propagations': 2, 'nlsat-stages': 3, 'num-allocs': 675596154, 'rlimit-count': 8961, 'solve-eqs-elim-vars': 4, 'solve-eqs-steps': 10, "time": 2.1},
+#     # Add more solutions as needed
+# }
+
+# # Define the weights for all parameters based on priority (1 being the highest priority)
+# weights = {'time': 1, 'memory': -2, 'solve-eqs-steps': 3, 'nlsat-stages': 4}
+
+# # Normalize each parameter to [0, 1] and calculate the weighted score for each solution
+# max_values = {key: max(solution[key] for solution in solutions.values() if key in solution) for key in weights}
+# min_values = {key: min(solution[key] for solution in solutions.values() if key in solution) for key in weights}
+
+# def calculate_score(solution):
+#     score = 0
+#     for key, weight in weights.items():
+#         if key not in solution:
+#             continue
+#         # Normalize the value to [0, 1] range
+#         if key == 'memory' or key == 'nlsat-stages':
+#             normalized_value = 1 - (solution[key] - min_values[key]) / (max_values[key] - min_values[key]) if max_values[key] != min_values[key] else 0
+#         else:
+#             normalized_value = (solution[key] - min_values[key]) / (max_values[key] - min_values[key]) if max_values[key] != min_values[key] else 0
+#         # Subtract from 1 if higher values are better
+#         if weight < 0:
+#             normalized_value = 1 - normalized_value
+#             weight = -weight
+#         score += weight * normalized_value
+#     print("Score for solution", solution, ":", score)
+#     return score
+
+# # Sort solutions based on their scores
+# sorted_solutions = sorted(solutions.items(), key=lambda x: calculate_score(x[1]), reverse=True)
+
+# print("Solutions sorted by composite score:")
+# for  solution in sorted_solutions:
+#     print(f"Solution: {solution}")
+
+
+# results = [
+#     {'solve-eqs-steps': 11, 'nlsat stages': 90, 'memory': 20, 'time': 0.006, 'newval': 4, 'othernew': 45},
+#     {'solve-eqs-steps': 10, 'nlsat stages': 3, 'memory': 20, 'time': 0.1, 'newval': 3, 'othernew': 4},
+#     {'solve-eqs-steps': 10, 'nlsat stages': 40, 'memory': 33.4, 'time': 0.002, 'newval': 6, 'othernew': 44},
+#     {'solve-eqs-steps': 100, 'nlsat stages': 1, 'memory': 71.5, 'time': 0.003, 'newval': 33, 'othernew': 3}
+# ]
+
+# # Define the weights based on priority (1 being the highest priority)
+# # weights = {'time': 4, 'memory': 3, 'solve-eqs-steps': 2, 'nlsat stages': 1}
+# weightz = {'time': 1, 'memory': 2, 'solve-eqs-steps': 3, 'nlsat stages': -4}
+
+# # Normalize each parameter to [0, 1] and calculate the weighted score for each solution
+    
+    
+# def calculate_score(solution, weights,solutions):
+#     max_values = {key: max(solution[key] for solution in solutions) for key in weightz}
+#     min_values = {key: min(solution[key] for solution in solutions) for key in weightz}
+
+#     score = 0
+#     for key, weight in weights.items():
+#         # Normalize the value to [0, 1] range
+#         if key == 'time' or key == 'memory': # Lower values are better
+#             normalized_value = 1 - (solution[key] - min_values[key]) / (max_values[key] - min_values[key]) if max_values[key] != min_values[key] else 0
+#         else: # Higher values are better
+#             normalized_value = (solution[key] - min_values[key]) / (max_values[key] - min_values[key]) if max_values[key] != min_values[key] else 0
+#         # Subtract from 1 if higher values are better
+#         if weight < 0:
+#             normalized_value = 1 - normalized_value
+#             weight = -weight
+#         score += weight * normalized_value
+        
+#     print("Score for solution", solution, ":", score)
+#     return score
+
+# # Sort solutions based on their scores
+# # sorted_solutions = sorted(solutions, key=calculate_score)
+    
+# sorted_solutions = sorted(results, key=lambda x: calculate_score(x, weightz, results))
+
+
+# print("Solutions sorted by composite score:")
+# for solution in sorted_solutions:
+#     print(solution)
+
 # import z3
 
 
@@ -50,28 +177,28 @@ from z3 import *
 # y = Int('y')
 # n = x + y >= 3
 # x = 20
-x = Int('x')
-y = Int('y')
-asserts = "(assert (= (/ x (* 2 y)) 20))"
-assertion = parse_smt2_string(asserts, decls={"x": x, "y": y})
-print("is expr", is_expr(assertion[0].arg(1)))
-print("is const", is_const(assertion[0].arg(1)))
-print("is const", is_const(assertion[0].arg(1).arg(0)) )
-print("main assertion is: ",assertion[0].arg(1).arg(0))
+# x = Int('x')
+# y = Int('y')
+# asserts = "(assert (= (/ x (* 2 y)) 20))"
+# assertion = parse_smt2_string(asserts, decls={"x": x, "y": y})
+# print("is expr", is_expr(assertion[0].arg(1)))
+# print("is const", is_const(assertion[0].arg(1)))
+# print("is const", is_const(assertion[0].arg(1).arg(0)) )
+# print("main assertion is: ",assertion[0].arg(1).arg(0))
 
 
 # The right-hand side of the equality expression, where the number 20 is located
 
 # print("rhs value:", rhs)
-for term in assertion[0].children():
-    if isinstance(term, ArithRef):
-        # Check if the term is a division operation
-        if is_div(term):
-            # Access the numerator of the division
-            numerator = term.children()[0]
-            if is_const(numerator):
-                constant_value = numerator.as_long()
-                print("Constant value:", constant_value)
+# for term in assertion[0].children():
+#     if isinstance(term, ArithRef):
+#         # Check if the term is a division operation
+#         if is_div(term):
+#             # Access the numerator of the division
+#             numerator = term.children()[0]
+#             if is_const(numerator):
+#                 constant_value = numerator.as_long()
+#                 print("Constant value:", constant_value)
 
 
 

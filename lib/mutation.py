@@ -219,11 +219,11 @@ class MutationTesting:
                 m = solver.model()
                 result.append(solver)
                 # self.mutation_number += 1
-                print_d("Sat and model is: \n"+ str(m))
-                print_p("Sat and New SMT-LIB formula is: \n"+ solver.to_smt2()) #sexpr
-                print_d("-----------------------------------")
+                # print_d("Sat and model is: \n"+ str(m))
+                # print_p("Sat and New SMT-LIB formula is: \n"+ solver.to_smt2()) #sexpr
+                # print_d("-----------------------------------")
             else:
-                print_d("unsat and failed to find a Model")
+                # print_d("unsat and failed to find a Model")
                 print_d("************* END *************")
                 
         else:

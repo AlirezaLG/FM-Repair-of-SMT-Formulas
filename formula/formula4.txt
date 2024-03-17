@@ -1,3 +1,4 @@
-a, b = Reals('a b')
+(declare-const a Int)
+(declare-const b Int)
 (assert (> (+ a b) 10))
 (assert (< a 5))

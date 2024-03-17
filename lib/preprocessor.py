@@ -4,7 +4,6 @@ from func import *
 class Preprocessor:
     
     
-    
     def __init__(self):
         # Initialize MutationTesting class
         asserts = [] 

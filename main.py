@@ -4,17 +4,15 @@ from lib.mutation import *
 from func import *
 from lib.preprocessor import *
 
-# Read the SMT-LIB formula from a text file
 
-
+# Read the formula from the file
 try:
-    file_path = './formula/formula30.txt';
+    file_path = './formula/formula31.txt';
     with open(file_path, 'r') as file:
         formula_string = file.read()
 except Exception as e:
     print("Error in Reading file :", e , "\n")
     sys.exit()  
-
 
 
 # Call the function to extract constants with data types and assertions
@@ -51,7 +49,7 @@ if solver.check() == sat:
     model = solver.model()
     print("Formula is SAT and Our model is:\n",model)
     print_p("SMT-LIB formula is: \n"+ solver.to_smt2())
-   
+
 elif solver.check() == unsat:
     # check the unsat core
     unsat = UnsatCoreChecker()
@@ -61,16 +59,19 @@ elif solver.check() == unsat:
     preprocessor = Preprocessor()   
     preprocessor.set_strategy(assertions, unsat_result)
     
-    
+    # check UNSAT core
     print("Formula is UnSAT core at:\t"+ str(unsat_result))
+    
     # check the mutation
     mutation = MutationTesting()
     mutation.mutant_each_unsat(assertions, unsat_result)
-    print("number of solution is", len(result))
-    for solver in result:
-        for key, value in solver.statistics():
-            print("- {}: {}".format(key, value))
-        print("\n")
+    
+    # find the best model Base on Time and memory
+    print('\n************************* Best Model *************************')
+    print("Total number of solution: \t", len(result))
+    model = find_best_model()
+    print("The Best Model Base on Less Time and Memory is: \n\n",result[model[0][0]].to_smt2())
+    print('***************************** End ****************************')
 
 else:
     print("The formula is unknown.") 

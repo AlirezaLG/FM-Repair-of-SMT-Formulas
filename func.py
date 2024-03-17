@@ -1,6 +1,42 @@
 from z3 import * 
 from config import *
 
+def calculate_score(entry, weights, max_values, min_values):
+    score = 0
+    for key, weight in weights.items():
+        # Check if the key exists in the entry to handle missing attributes
+        if key in entry:
+            # Normalize the value to [0, 1] range
+            normalized_value = (entry[key] - min_values[key]) / (max_values[key] - min_values[key]) if max_values[key] != min_values[key] else 0
+            # Adjust score based on weight
+            score += weight * normalized_value if weight > 0 else -weight * (1 - normalized_value)
+    return score
+
+
+def find_best_model():
+    global result
+    datasets = {}
+    # convert statistics datatype to dictionary
+    for i, re in enumerate(result):
+        data = {}    
+        for key in re.statistics():
+            # print("key 0 ",key[0], "; key 1 ",key[1])
+            data[str(key[0])] = key[1]
+        
+        datasets[i] = data
+    
+    # smaller positive value has higher priority
+    # bigger negative value has higher priority 
+    weights = {':time': -1, ':memory': -1}
+    
+    # Find the maximum and minimum values for each attribute
+    max_values = {key: max(entry.get(key, 0) for entry in datasets.values()) for key in weights}
+    min_values = {key: min(entry.get(key, float('inf')) for entry in datasets.values()) for key in weights}
+
+    # Sort the solutions based on the score
+    sorted_solutions = sorted(datasets.items(), key=lambda item: calculate_score(item[1], weights, max_values, min_values ), reverse=True)
+    return sorted_solutions
+    
 
 def replace_logical_operators(expr):
     # expr = Bool(str(expr))
@@ -147,38 +183,6 @@ def replace_arithmetic_decl(expr, new_op):
         raise ValueError("Unsupported operator")
 
   
-def extract_constants_and_assertions_with_datatypes(formula_string):
-    constants = {}
-    assertions = []
-    lines = formula_string.split('\n')
-    for line in lines:
-        if line.startswith('(declare-const'):
-            parts = line.split()
-            constant = parts[1]
-            datatype = parts[2]
-            constants[constant] = datatype[:-1]  # Remove the closing bracket
-        elif line.startswith('(declare-fun'):
-            parts = line.split()
-            constant = parts[1]
-            datatype = parts[3]
-            constants[constant] = datatype[:-1]  # Remove the closing bracket
-        elif line.startswith('(assert'):
-            assertions.append(line)
-        elif 'Ints' in line:
-            # Handle the Ints('x y') format
-            vars_part = line.split('Ints(')[-1].split(')')[0].replace("'", "")
-            vars_list = vars_part.split()
-            for var in vars_list:
-                constants[var] = 'Int'
-        elif 'Reals' in line:
-            # Handle the Reals('x y') format
-            vars_part = line.split('Reals(')[-1].split(')')[0].replace("'", "")
-            vars_list = vars_part.split()
-            for var in vars_list:
-                constants[var] = 'Real'
-    return constants, assertions
-  
-    
 # def extract_constants_and_assertions_with_datatypes(formula_string):
 #     constants = {}
 #     assertions = []
@@ -196,8 +200,40 @@ def extract_constants_and_assertions_with_datatypes(formula_string):
 #             constants[constant] = datatype[:-1]  # Remove the closing bracket
 #         elif line.startswith('(assert'):
 #             assertions.append(line)
-#             # assertions.append(line[8:-1])
-#     return constants, assertions   
+#         elif 'Ints' in line:
+#             # Handle the Ints('x y') format
+#             vars_part = line.split('Ints(')[-1].split(')')[0].replace("'", "")
+#             vars_list = vars_part.split()
+#             for var in vars_list:
+#                 constants[var] = 'Int'
+#         elif 'Reals' in line:
+#             # Handle the Reals('x y') format
+#             vars_part = line.split('Reals(')[-1].split(')')[0].replace("'", "")
+#             vars_list = vars_part.split()
+#             for var in vars_list:
+#                 constants[var] = 'Real'
+#     return constants, assertions
+  
+    
+def extract_constants_and_assertions_with_datatypes(formula_string):
+    constants = {}
+    assertions = []
+    lines = formula_string.split('\n')
+    for line in lines:
+        if line.startswith('(declare-const'):
+            parts = line.split()
+            constant = parts[1]
+            datatype = parts[2]
+            constants[constant] = datatype[:-1]  # Remove the closing bracket
+        elif line.startswith('(declare-fun'):
+            parts = line.split()
+            constant = parts[1]
+            datatype = parts[3]
+            constants[constant] = datatype[:-1]  # Remove the closing bracket
+        elif line.startswith('(assert'):
+            assertions.append(line)
+            # assertions.append(line[8:-1])
+    return constants, assertions   
 
 #     return constants, assertions
 # print works only on Development mode
